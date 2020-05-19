@@ -57,7 +57,8 @@ tail(g.gantt)
 
 
 ```{r}
-pal <- park_palette("GrandTeton")
+pal <- park_palette("Acadia")
+pal
 ```
 
 ```{r}
@@ -67,8 +68,10 @@ gantt.chart <- ggplot(g.gantt,
        scale_color_manual(values = pal, name = "Project Component") +
        labs(x = "", y = NULL, title = "Project Timeline") +
        theme_classic() +
-       theme(axis.text.x = element_text(angle = 45, hjust = 1), plot.title = element_text(hjust = 0.5)) +
-       scale_x_date(date_labels =  "%b %Y")
+       theme(axis.text.x = element_text(angle = 45, hjust = 1, face = "bold"), 
+             axis.text.y = element_text(face="bold"), 
+             plot.title = element_text(hjust = 0.5)) +
+       scale_x_date(date_labels =  "%B %Y")
 
 gantt.chart
 
