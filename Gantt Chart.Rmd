@@ -1,0 +1,80 @@
+---
+title: "Gantt Chart"
+author: "Jen Baron"
+date: 'May 19, 2020'
+output: 
+  html_document:
+    keep_md: true
+---
+
+
+Source Code: https://www.molecularecologist.com/2019/01/simple-gantt-charts-in-r-with-ggplot2-and-the-tidyverse/
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(tidyverse)
+library(nationalparkcolors)
+```
+
+
+Then I load the text file containing the schedule data. I also set up two vectors containing the unique names of activities in the schedule file, and the unique names of the project elements. These will come in handy for controlling the display order of the items in the Gantt chart.
+```{r}
+gantt <- read.csv("data/gantt.csv", h=T)
+gantt
+
+acts <- c(
+ "Crossdating",
+"Detrending",
+"Prepare Isotope Data",
+"Collect & Prepare Climate Data",
+"Preliminary Analysis",
+"Climate-Growth Analysis",
+"Statistical Analysis",
+"Manuscript: Outine",
+"Manuscript: Methods",
+"Manuscript: Results",
+"Manuscript: Introduction",
+"Manuscript: Discussion",
+"Manuscript: Final Draft")
+
+els <- c("Dendrochronology", "Data Management", "Analysis", "Deliverable")
+
+```
+
+
+To work neatly with ggplot, I need the start and end dates to be in a single column, with another column to identify whether they’re the start or end date. This is the job of the gather() function. I’m also going to convert the Activities and Project.element columns into factors, with levels defined to control the order in which they appear in the chart. This is where those two vectors of activity and project element names come in — the ordering of names in those vectors can determine the ordering of levels in the factors.
+
+With tidyverse notation, I can do this all on one line of code:
+```{r}
+g.gantt <- gather(gantt, "state", "date", 4:5) %>% mutate(date = as.Date(date, "%Y.%m.%d"), Activity=factor(Activity, acts[length(acts):1]), Project.element=factor(Project.element, els))
+
+tail(g.gantt)
+```
+
+
+```{r}
+pal <- park_palette("GrandTeton")
+```
+
+```{r}
+gantt.chart <- ggplot(g.gantt,
+       aes(date, Activity, colour = Project.element, group = Item)) +
+       geom_line(size = 6) + 
+       scale_color_manual(values = pal, name = "Project Component") +
+       labs(x = "", y = NULL, title = "Project Timeline") +
+       theme_classic() +
+       theme(axis.text.x = element_text(angle = 45, hjust = 1), plot.title = element_text(hjust = 0.5)) +
+       scale_x_date(date_labels =  "%b %Y")
+
+gantt.chart
+
+ggsave("figures/gantt.chart.jpeg", gantt.chart, units = "cm", width = 20, height = 12)
+```
+
+
+
+
